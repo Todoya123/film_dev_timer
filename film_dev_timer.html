@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胶片冲洗助手 Pro</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #ff9800;
+            --text-main: #ffffff;
+            --text-sec: #aaaaaa;
+            --btn-start: #4caf50;
+            --btn-stop: #f44336;
+            --btn-next: #2196f3;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .selector-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            background-color: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid #333;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        optgroup {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .main-display {
+            background-color: var(--surface-color);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .step-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            min-height: 2.4rem;
+        }
+
+        .timer {
+            font-size: 5rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .info-item {
+            background-color: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-sec);
+            margin-bottom: 4px;
+        }
+
+        .info-item div {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .notes {
+            grid-column: span 2;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active { opacity: 0.8; }
+        #btn-play { background-color: var(--btn-start); }
+        #btn-pause { background-color: var(--btn-stop); }
+        #btn-next { background-color: var(--btn-next); }
+
+        .up-next {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: var(--text-sec);
+        }
+
+        @keyframes flash {
+            0% { background-color: var(--bg-color); }
+            50% { background-color: #550000; }
+            100% { background-color: var(--bg-color); }
+        }
+        .flashing { animation: flash 1s infinite; }
+    </style>
+</head>
+<body>
+
+    <h1>🎞️ 胶片冲洗助手 Pro</h1>
+
+    <div class="selector-container">
+        <select id="process-selector" onchange="changeProcess()">
+            <optgroup label="彩色负片 (Color Negative)">
+                <option value="C41">C-41 标准工艺 (3分15秒)</option>
+                <option value="C41_Push1">C-41 迫冲 +1档 (4分15秒)</option>
+                <option value="Cs41">Cinestill Cs41 (两浴法)</option>
+            </optgroup>
+            <optgroup label="彩色反转片 (Color Slide)">
+                <option value="E6">E-6 标准三浴工艺</option>
+            </optgroup>
+            <optgroup label="电影胶片 (Motion Picture)">
+                <option value="ECN2">ECN-2 标准工艺 (含除碳)</option>
+            </optgroup>
+            <optgroup label="黑白胶片 (B&W)">
+                <option value="BW_D76">D-76 1:1 (通用参考 8分钟)</option>
+                <option value="BW_HC110">HC-110 B液 (通用参考 5分钟)</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="main-display" id="main-display">
+        <div class="step-name" id="step-name">加载中...</div>
+        <div class="timer" id="timer">00:00</div>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <span>🌡️ 温度要求</span>
+                <div id="step-temp">--°C</div>
+            </div>
+            <div class="info-item">
+                <span>🔄 动作/搅拌</span>
+                <div id="step-action">--</div>
+            </div>
+            <div class="info-item notes">
+                <span>⚠️ 注意事项</span>
+                <div id="step-notes">--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="btn-play" onclick="startTimer()">开始</button>
+        <button id="btn-pause" onclick="pauseTimer()">暂停</button>
+        <button id="btn-next" onclick="nextStep()">下一步 ⏭</button>
+    </div>
+
+    <div class="up-next" id="up-next">下一阶段: 无</div>
+
+    <script>
+        const processes = {
+            "C41": [
+                { name: "1. 预洗 (Pre-wash)", time: 60, temp: "38.0°C", action: "连续摇晃", notes: "预热显影罐。倒出水呈带颜色的状态是正常的。" },
+                { name: "2. 彩显 (Developer)", time: 195, temp: "38.0°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "核心步骤！温度控制极度关键，误差不得超过±0.3°C。" },
+                { name: "3. 漂白定影 (Blix)", time: 390, temp: "38.0°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "可能会产生气体，注意显影罐排气。" },
+                { name: "4. 水洗 (Wash)", time: 180, temp: "30-38°C", action: "活水冲洗或每30秒换水", notes: "彻底洗净残留的药水。" },
+                { name: "5. 稳定 (Stabilizer)", time: 60, temp: "室温", action: "轻轻搅动几下静置", notes: "切勿起过多泡沫。做完此步后直接悬挂晾干。" }
+            ],
+            "C41_Push1": [
+                { name: "1. 预洗 (Pre-wash)", time: 60, temp: "38.0°C", action: "连续摇晃", notes: "为迫冲做准备，使胶片达到工作温度。" },
+                { name: "2. 彩显 (Dev) - 迫冲+1", time: 255, temp: "38.0°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "时间延长至4分15秒以补偿欠曝。控温极其重要。" },
+                { name: "3. 漂白定影 (Blix)", time: 390, temp: "38.0°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "与标准工艺时间相同即可。" },
+                { name: "4. 水洗 (Wash)", time: 180, temp: "30-38°C", action: "活水冲洗", notes: "彻底洗净残留的药水。" },
+                { name: "5. 稳定 (Stabilizer)", time: 60, temp: "室温", action: "轻轻搅动几下静置", notes: "防褪色与水渍，完成后直接晾干。" }
+            ],
+            "Cs41": [
+                { name: "1. 预洗 (Pre-wash)", time: 60, temp: "39.0°C", action: "连续摇晃", notes: "Cs41标准温度为39度（比常规高1度）。" },
+                { name: "2. 彩显 (Developer)", time: 210, temp: "39.0°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "Cs41两浴法显影时间为3分30秒。" },
+                { name: "3. 漂定 (Blix)", time: 480, temp: "24-40°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "长达8分钟，温度要求较宽泛，注意开盖排气防爆。" },
+                { name: "4. 水洗 (Wash)", time: 180, temp: "室温", action: "活水冲洗", notes: "洗净漂定液残留。" }
+            ],
+            "E6": [
+                { name: "1. 预洗 (Pre-wash)", time: 180, temp: "38.0°C", action: "连续摇晃", notes: "使胶片预热至工作温度。" },
+                { name: "2. 首显 (1st Developer)", time: 390, temp: "38.0°C", action: "前15秒连续，之后每30秒颠倒2次", notes: "决定反转片亮度，温度需严格控制在38°C。" },
+                { name: "3. 水洗 (Wash)", time: 150, temp: "38.0°C", action: "活水冲洗", notes: "洗掉首显药液残留。" },
+                { name: "4. 彩显 (Color Dev)", time: 270, temp: "38.0°C", action: "前15秒连续，之后每30秒颠倒2次", notes: "含反转剂，胶片在此步骤显色。" },
+                { name: "5. 漂白定影 (Blix)", time: 360, temp: "38.0°C", action: "前15秒连续，之后每30秒颠倒2次", notes: "去除多余的银。" },
+                { name: "6. 水洗 (Wash)", time: 240, temp: "38.0°C", action: "活水冲洗", notes: "彻底清洗。" },
+                { name: "7. 稳定 (Stabilizer)", time: 60, temp: "室温", action: "轻轻搅动", notes: "防褪色及防死水渍。之后直接晾干。" }
+            ],
+            "ECN2": [
+                { name: "1. 除碳预浴 (Prebath)", time: 10, temp: "27.0°C", action: "用力摇晃10秒后倒掉", notes: "软化碳黑层。倒出后用温水反复清洗3-4次至水清澈。" },
+                { name: "2. 彩显 (Developer)", time: 180, temp: "41.1°C", action: "前10秒连续，之后每30秒颠倒4次", notes: "ECN-2标准温度为41.1度，严格控温。" },
+                { name: "3. 停影 (Stop Bath)", time: 60, temp: "27-38°C", action: "连续颠倒", notes: "迅速停止显影过程（推荐使用停影液）。" },
+                { name: "4. 水洗 (Wash)", time: 60, temp: "27-38°C", action: "活水冲洗", notes: "冲掉停影液。" },
+                { name: "5. 漂白 (Bleach)", time: 180, temp: "38.0°C", action: "每30秒颠倒4次", notes: "ECN-2漂白液需充分供氧。" },
+                { name: "6. 水洗 (Wash)", time: 60, temp: "27-38°C", action: "活水冲洗", notes: "洗净漂白液。" },
+                { name: "7. 定影 (Fixer)", time: 120, temp: "38.0°C", action: "每30秒颠倒4次", notes: "去除卤化银。" },
+                { name: "8. 终洗与去碳检视", time: 180, temp: "室温", action: "活水冲洗", notes: "用海绵轻轻擦拭非药膜面，确保碳层已彻底除净。" }
+            ],
+            "BW_D76": [
+                { name: "1. 显影 (D-76 1:1)", time: 480, temp: "20.0°C", action: "前30秒连续，之后每分钟颠倒3次", notes: "8分钟为中速卷常见参考时间。请根据具体胶卷型号微调。" },
+                { name: "2. 停影/水洗", time: 60, temp: "20.0°C", action: "连续颠倒", notes: "使用停影液或清水终止显影。" },
+                { name: "3. 定影 (Fixer)", time: 300, temp: "20.0°C", action: "前30秒连续，之后每分钟颠倒3次", notes: "推荐使用快速定影液。" },
+                { name: "4. 水洗 (Wash)", time: 300, temp: "20.0°C", action: "活水冲洗", notes: "流水水洗5分钟以上。" },
+                { name: "5. 润湿剂 (Photo-Flo)", time: 60, temp: "室温", action: "静置或轻轻提拉", notes: "防止水渍，切勿剧烈摇晃起泡。" }
+            ],
+            "BW_HC110": [
+                { name: "1. 显影 (HC-110 B液)", time: 300, temp: "20.0°C", action: "前30秒连续，之后每分钟颠倒3次", notes: "5分钟为常见高反差浓缩液参考时间。冲洗速度快，注意准点倒药。" },
+                { name: "2. 停影 (Stop Bath)", time: 60, temp: "20.0°C", action: "连续颠倒", notes: "因显影时间短，强烈建议使用酸性停影液秒停。" },
+                { name: "3. 定影 (Fixer)", time: 300, temp: "20.0°C", action: "前30秒连续，之后每分钟颠倒3次", notes: "推荐使用快速定影液。" },
+                { name: "4. 水洗 (Wash)", time: 300, temp: "20.0°C", action: "活水冲洗", notes: "流水彻底水洗。" },
+                { name: "5. 润湿剂 (Photo-Flo)", time: 60, temp: "室温", action: "静置", notes: "浸泡后直接悬挂。" }
+            ]
+        };
+
+        let currentProcessData = [];
+        let currentStepIndex = 0;
+        let timeLeft = 0;
+        let timerInterval = null;
+
+        function playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e) { console.log("Audio Error"); }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateUI() {
+            if (currentStepIndex >= currentProcessData.length) {
+                document.getElementById('step-name').innerText = "🎉 冲洗完成！";
+                document.getElementById('timer').innerText = "00:00";
+                document.getElementById('step-temp').innerText = "--";
+                document.getElementById('step-action').innerText = "--";
+                document.getElementById('step-notes').innerText = "请将胶片挂在无尘处自然阴干。";
+                document.getElementById('up-next').innerText = "所有步骤已结束。";
+                return;
+            }
+
+            const step = currentProcessData[currentStepIndex];
+            document.getElementById('step-name').innerText = step.name;
+            document.getElementById('timer').innerText = formatTime(timeLeft);
+            document.getElementById('step-temp').innerText = step.temp;
+            document.getElementById('step-action').innerText = step.action;
+            document.getElementById('step-notes').innerText = step.notes;
+
+            if (currentStepIndex + 1 < currentProcessData.length) {
+                document.getElementById('up-next').innerText = `下一阶段: ${currentProcessData[currentStepIndex + 1].name}`;
+            } else {
+                document.getElementById('up-next').innerText = "下一阶段: 无 (即将完成)";
+            }
+        }
+
+        function changeProcess() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.body.classList.remove('flashing');
+            
+            const selector = document.getElementById('process-selector');
+            currentProcessData = processes[selector.value];
+            currentStepIndex = 0;
+            timeLeft = currentProcessData[0].time;
+            updateUI();
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            if (currentStepIndex >= currentProcessData.length) return;
+
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if(AudioContext) { new AudioContext().resume(); }
+
+            document.body.classList.remove('flashing');
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = formatTime(timeLeft);
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    playBeep();
+                    document.body.classList.add('flashing');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function nextStep() {
+            document.body.classList.remove('flashing');
+            if (currentStepIndex < currentProcessData.length - 1) {
+                currentStepIndex++;
+                timeLeft = currentProcessData[currentStepIndex].time;
+                pauseTimer(); 
+                updateUI();
+            } else if (currentStepIndex === currentProcessData.length - 1) {
+                currentStepIndex++; 
+                pauseTimer();
+                updateUI();
+            }
+        }
+
+        changeProcess();
+    </script>
+</body>
+</html>
