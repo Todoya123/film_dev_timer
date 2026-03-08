@@ -3,67 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暗房大师 Pro - 电影卷与正冲全能版</title>
+    <title>暗房全能大师 - 终极工艺库</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
     <style>
         :root {
-            --bg: #09090b; --card: #18181b; --primary: #f59e0b;
-            --secondary: #06b6d4; --text: #f4f4f5;
+            --bg: #09090b; --card: #18181b; --primary: #fbbf24;
+            --secondary: #22d3ee; --text: #f4f4f5;
             --success: #10b981; --danger: #ef4444;
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .config-box { width: 100%; max-width: 520px; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #27272a; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+        .config-box { width: 100%; max-width: 520px; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #27272a; }
         label { font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3f3f46; background: #09090b; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; }
-        select:focus { border-color: var(--primary); }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3f3f46; background: #09090b; color: #fff; font-size: 0.95rem; margin-bottom: 15px; outline: none; -webkit-appearance: none; }
         
         .stat-row { width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
         .stat-item { background: var(--card); padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #27272a; }
-        .stat-item small { display: block; font-size: 0.65rem; color: #71717a; margin-bottom: 4px; }
-        .stat-item b { font-size: 1rem; color: var(--secondary); }
+        .stat-item small { display: block; font-size: 0.6rem; color: #71717a; margin-bottom: 4px; }
+        .stat-item b { font-size: 0.9rem; color: var(--secondary); }
 
-        .timer-panel { width: 100%; max-width: 520px; background: #000; border-radius: 24px; padding: 30px; text-align: center; border-bottom: 6px solid var(--primary); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); }
-        #timer { font-size: 6.5rem; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; letter-spacing: -3px; color: #fff; }
-        .prog-bg { width: 100%; height: 10px; background: #27272a; border-radius: 5px; overflow: hidden; margin-bottom: 25px; }
-        #prog-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), #fbbf24); transition: width 0.3s linear; }
+        .timer-panel { width: 100%; max-width: 520px; background: #000; border-radius: 24px; padding: 30px; text-align: center; border-bottom: 6px solid var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        #timer { font-size: 6.5rem; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; letter-spacing: -3px; }
+        .prog-bg { width: 100%; height: 8px; background: #27272a; border-radius: 4px; overflow: hidden; margin-bottom: 25px; }
+        #prog-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s linear; }
         
         .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; }
         .meta-box { background: #18181b; padding: 12px; border-radius: 10px; border: 1px solid #27272a; }
         .meta-box small { color: #a1a1aa; font-size: 0.7rem; display: block; margin-bottom: 4px; }
-        .meta-box div { font-size: 0.9rem; font-weight: 500; }
 
         .btn-group { display: flex; gap: 12px; width: 100%; max-width: 520px; margin-top: 20px; }
-        button { flex: 1; padding: 20px; border-radius: 14px; border: none; color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
-        button:active { transform: scale(0.98); }
+        button { flex: 1; padding: 20px; border-radius: 14px; border: none; color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
         .btn-start { background: var(--success); } .btn-pause { background: var(--danger); } .btn-next { background: #3f3f46; }
         
-        .alarm { animation: pulse-red 0.6s infinite; }
+        .alarm { animation: pulse-red 0.5s infinite; }
         @keyframes pulse-red { 50% { background: #450a0a; } }
     </style>
 </head>
 <body>
 
     <div class="config-box">
-        <label>1. 冲洗工艺与胶片大类</label>
+        <label>1. 冲洗工艺 (PROCESS)</label>
         <select id="proc-sel" onchange="syncModels()"></select>
 
-        <label>2. 品牌型号 (全系电影与正片库)</label>
+        <label>2. 胶片型号 (FILM DATABASE)</label>
         <select id="film-sel" onchange="init()"></select>
 
-        <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:12px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div>
-                <label>3. 显影罐选择</label>
+                <label>3. 显影罐</label>
                 <select id="tank-sel" onchange="init()">
-                    <option value="lb135r">Lab-Box 135 (手柄旋转)</option>
-                    <option value="lb135i">Lab-Box 135 (满灌静置)</option>
-                    <option value="upb1a_35">LOMO UPB-1A (35mm - 1.5L)</option>
-                    <option value="upb1a_16">LOMO UPB-1A (16mm - 1.3L)</option>
+                    <option value="upb1a_35">LOMO UPB-1A (35mm-1.5L)</option>
+                    <option value="upb1a_16">LOMO UPB-1A (16mm-1.3L)</option>
+                    <option value="lb135r">Lab-Box (旋转-270ml)</option>
+                    <option value="lb135i">Lab-Box (满灌-490ml)</option>
                     <option value="j1510">JOBO 1510 (250ml)</option>
                     <option value="p1">Paterson (290ml)</option>
                 </select>
             </div>
             <div>
-                <label>4. 过期时长补偿</label>
+                <label>4. 过期补偿</label>
                 <select id="exp-sel" onchange="init()">
                     <option value="0">新鲜/冷冻</option>
                     <option value="12">5-10年 (+12%)</option>
@@ -76,64 +73,65 @@
 
     <div class="stat-row">
         <div class="stat-item"><small>注药量</small><b id="v-out">--</b></div>
-        <div class="stat-item"><small>药水疲劳</small><b id="p-out">0%</b></div>
-        <div class="stat-item"><small>显影累计补偿</small><b id="total-c">0%</b></div>
+        <div class="stat-item"><small>疲劳补偿</small><b id="p-out">0%</b></div>
+        <div class="stat-item"><small>总显影时长</small><b id="t-out">--</b></div>
     </div>
 
-    <div style="width:100%; max-width:520px; margin-bottom:15px;">
-        <label>药水疲劳度调节 (仅影响显影步)</label>
-        <input type="range" id="comp-slide" min="0" max="30" step="5" value="0" style="width:100%;" oninput="init()">
-    </div>
+    <input type="range" id="comp-slide" min="0" max="30" step="5" value="0" style="width:100%; max-width:520px; margin-bottom:15px;" oninput="init()">
 
     <div class="timer-panel" id="panel">
-        <div id="step-name" style="color:var(--primary); font-size:1.3rem; font-weight:bold;">STANDBY</div>
+        <div id="step-name" style="color:var(--primary); font-weight:bold;">STANDBY</div>
         <div id="timer">00:00</div>
         <div class="prog-bg"><div id="prog-fill"></div></div>
         <div class="meta">
-            <div class="meta-box"><small>🌡️ 目标温度</small><div id="m-temp">--</div></div>
-            <div class="meta-box"><small>🔄 动作建议</small><div id="m-act">--</div></div>
-            <div class="meta-box" style="grid-column: span 2;"><small>📝 专家备注</small><div id="m-note">--</div></div>
+            <div class="meta-box"><small>🌡️ 温度</small><div id="m-temp">--</div></div>
+            <div class="meta-box"><small>🔄 动作</small><div id="m-act">--</div></div>
+            <div class="meta-box" style="grid-column: span 2;"><small>📝 贴士</small><div id="m-note">--</div></div>
         </div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-start" onclick="run()">开始计时</button>
+        <button class="btn-start" onclick="run()">开始</button>
         <button class="btn-pause" onclick="stop()">暂停</button>
         <button class="btn-next" onclick="next()">下一步</button>
     </div>
 
     <script>
         const noSleep = new NoSleep();
-        const TANKS = { lb135r:270, lb135i:490, upb1a_35:1500, upb1a_16:1300, j1510:250, p1:290 };
+        const TANKS = { upb1a_35:1500, upb1a_16:1300, lb135r:270, lb135i:490, j1510:250, p1:290 };
 
         const DB = {
-            "C-41 (标准彩负)": {
-                "Lucky 乐凯 C200 (国产经典)": 205, "Kodak Gold/ColorPlus 200": 195, "Kodak Portra 160/400": 195, "Phoenix 凤凰 200": 195, "CineStill 800T/50D": 195
+            "C-41 (彩负)": {
+                "Fuji C200 / C400 (日本产)": 195, "Fuji Superia Premium 400": 195, "Fuji Pro 400H": 195, "Lucky 乐凯 C200": 205, "Kodak Gold/UltraMax": 195, "Kodak Portra 系": 195, "Phoenix 凤凰 200": 195
+            },
+            "E-6 (标准反转)": {
+                "Fuji Provia 100F (RDPIII)": 360, "Fuji Velvia 50 (RVP50)": 360, "Fuji Velvia 100 (RVP100)": 360, "Kodak Ektachrome E100": 360, "Fuji Astia 100F (停产)": 360
             },
             "ECN-2 (电影负片)": {
-                "Kodak 5203 (50D)": 180, "Kodak 5207 (250D)": 180, "Kodak 5219 (500T)": 180, "Fuji Eterna 系列": 180, "Lomo 电影卷": 180
+                "Kodak 5203 (50D)": 180, "Kodak 5207 (250D)": 180, "Kodak 5219 (500T)": 180, "Fuji Eterna 250D/500T": 180, "Fuji Reala 500D": 180
             },
-            "D-94A/95 (电影正片专用)": {
-                "Kodak 5294 (电影黑白正片)": 360, "Kodak 7294 (16mm 正片)": 360, "Kodak 2460 (黑白正片)": 330
+            "D-94A (电影正片)": {
+                "Kodak 5294 (黑白正片)": 360, "Kodak 7294 (16mm 正片)": 360, "Kodak 2460 (16/35mm)": 330, "Fuji IT-N 正片": 300
             },
             "彩负正冲 (C41 in E6)": {
-                "Lucky C200 (X-PRO)": 390, "Kodak Gold (X-PRO)": 390, "Fuji C200 (X-PRO)": 390, "电影卷去碳版 (X-PRO)": 360
+                "Fuji C200 (X-PRO)": 390, "Kodak Gold (X-PRO)": 390, "Lucky C200 (X-PRO)": 390, "Agfa CT (X-PRO)": 360
             },
             "黑白正冲 (BW Reversal)": {
-                "Kodak 2460 (反转工艺)": 480, "Lucky SHD100 (反转工艺)": 420, "Ilford HP5 (反转工艺)": 540, "Foma 100R (专用反转)": 300
+                "Lucky SHD100 (正冲)": 420, "Kodak 2460 (正冲)": 480, "Ilford HP5 (正冲)": 540, "Fomapan 100R": 300
             },
             "B&W (标准黑白)": {
-                "Ilford HP5+ / FP4+": 450, "Fomapan 100/200/400": 420, "Kodak Tri-X / T-Max": 465, "Shanghai 上海 GP3": 420, "Lucky SHD100 New": 360
+                "Ilford HP5+/FP4+": 450, "Fomapan 100/200/400": 420, "Kodak Tri-X/T-Max": 465, "Fuji Neopan Acros 100II": 420, "Lucky SHD100 New": 360
             }
         };
 
         const STEPS = {
-            "C-41 (标准彩负)": [{n:"预洗",t:60,tp:"38°"},{n:"彩显",isDev:true,tp:"38.0°"},{n:"漂定",t:390,tp:"38°"},{n:"水洗",t:180,tp:"35°"}],
-            "ECN-2 (电影负片)": [{n:"除碳",t:60,tp:"38°",a:"剧烈"},{n:"电影彩显",isDev:true,tp:"41.1°"},{n:"停影",t:30,tp:"38°"},{n:"漂定",t:360,tp:"38°"}],
-            "D-94A/95 (电影正片专用)": [{n:"显影",isDev:true,tp:"20°"},{n:"停显",t:30,tp:"20°"},{n:"定影",t:300,tp:"20°"}],
-            "彩负正冲 (C41 in E6)": [{n:"首显(E6)",isDev:true,tp:"38°"},{n:"二次显影(E6)",t:360,tp:"38°"},{n:"漂定",t:360,tp:"38°"}],
-            "黑白正冲 (BW Reversal)": [{n:"第一显影(强显)",isDev:true,tp:"20°"},{n:"漂白",t:300,tp:"20°",m:"剧烈毒性"},{n:"清液",t:120,tp:"20°"},{n:"二次显影",t:300,tp:"20°",m:"室内灯下操作"}],
-            "B&W (标准黑白)": [{n:"显影",isDev:true,tp:"20°"},{n:"定影",t:300,tp:"20°"}]
+            "C-41 (彩负)": [{n:"预洗",t:60,tp:"38°"},{n:"彩显",isDev:true,tp:"38.0°"},{n:"漂定",t:390,tp:"38°"},{n:"水洗",t:180,tp:"35°"}],
+            "E-6 (标准反转)": [{n:"首显",isDev:true,tp:"38.0°"},{n:"水洗",t:120,tp:"38°"},{n:"彩显",t:360,tp:"38.0°"},{n:"漂定",t:360,tp:"38°"}],
+            "ECN-2 (电影负片)": [{n:"除碳",t:60,tp:"38°"},{n:"电影彩显",isDev:true,tp:"41.1°"},{n:"停影",t:30,tp:"38°"},{n:"漂定",t:360,tp:"38°"}],
+            "D-94A (电影正片)": [{n:"第一显影",isDev:true,tp:"20°"},{n:"定影",t:300,tp:"20°"}],
+            "彩负正冲 (C41 in E6)": [{n:"首显(E6)",isDev:true,tp:"38°"},{n:"彩显(E6)",t:360,tp:"38°"},{n:"漂定",t:360,tp:"38°"}],
+            "黑白正冲 (BW Reversal)": [{n:"首显(强显)",isDev:true,tp:"20°"},{n:"漂白",t:300,tp:"20°"},{n:"清液",t:120,tp:"20°"},{n:"二次显影(明灯下)",t:300,tp:"20°"}],
+            "B&W (标准黑白)": [{n:"显影",isDev:true,tp:"20°"},{n:"停显",t:30,tp:"20°"},{n:"定影",t:300,tp:"20°"}]
         };
 
         let sIdx=0, time=0, total=0, timer=null;
@@ -156,23 +154,23 @@
 
             document.getElementById('v-out').innerText = TANKS[tank]+"ml";
             document.getElementById('p-out').innerText = pComp+"%";
-            document.getElementById('total-c').innerText = totalComp+"%";
             
             sIdx = 0;
             loadStep(STEPS[p], DB[p][m], totalComp);
         }
 
-        function loadStep(steps, baseDevTime, totalComp) {
+        function loadStep(steps, baseTime, totalComp) {
             const step = steps[sIdx];
-            let dur = step.t || baseDevTime;
+            let dur = step.t || baseTime;
             if(step.isDev) dur = Math.round(dur * (1 + totalComp/100));
 
             time = dur; total = dur;
             document.getElementById('step-name').innerText = step.n;
-            document.getElementById('m-temp').innerText = step.tp || "20°C";
-            document.getElementById('m-act').innerText = step.a || "标准翻转";
-            document.getElementById('m-note').innerText = (step.m || "") + (step.isDev ? " [补偿已应用]" : "");
+            document.getElementById('m-temp').innerText = step.tp || "20°";
+            document.getElementById('m-act').innerText = step.a || "标准搅拌";
+            document.getElementById('m-note').innerText = step.isDev ? "显影环节，补偿已应用" : "常规步骤";
             document.getElementById('timer').innerText = fmt(time);
+            document.getElementById('t-out').innerText = fmt(time);
             document.getElementById('prog-fill').style.width = "0%";
             document.getElementById('panel').classList.remove('alarm');
         }
@@ -201,9 +199,8 @@
             const p = document.getElementById('proc-sel').value;
             const m = document.getElementById('film-sel').value;
             const tc = parseInt(document.getElementById('comp-slide').value) + parseInt(document.getElementById('exp-sel').value);
-            if(sIdx < STEPS[p].length - 1) {
-                sIdx++; stop(); loadStep(STEPS[p], DB[p][m], tc);
-            } else { alert("冲洗流程已圆满完成！"); }
+            if(sIdx < STEPS[p].length - 1) { sIdx++; stop(); loadStep(STEPS[p], DB[p][m], tc); }
+            else { alert("冲洗完成！"); }
         }
 
         function beep() { try { const ac=new AudioContext(), os=ac.createOscillator(); os.connect(ac.destination); os.start(); os.stop(ac.currentTime+0.5); } catch(e){} }
