@@ -3,248 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>胶片冲洗全能大师 Lab-Master</title>
+    <title>胶片冲洗大师 Pro (过期胶卷增强版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
     <style>
         :root {
-            --bg: #0d0d0e;
-            --card: #1c1c1e;
-            --primary: #ffa726;
-            --secondary: #26c6da;
-            --text: #ffffff;
-            --success: #66bb6a;
-            --danger: #ef5350;
+            --bg: #0a0a0b; --card: #18181a; --primary: #ffa000;
+            --secondary: #00bcd4; --text: #e0e0e0;
+            --success: #4caf50; --danger: #f44336; --warn: #ffeb3b;
         }
-
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background: var(--bg); color: var(--text);
-            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
-        }
-
-        .config-area { width: 100%; max-width: 500px; margin-bottom: 15px; }
-        .row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 12px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .config-box { width: 100%; max-width: 500px; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #333; }
+        label { font-size: 0.7rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; font-size: 0.9rem; margin-bottom: 10px; box-sizing: border-box; }
         
-        label { font-size: 0.75rem; color: var(--primary); font-weight: bold; margin-bottom: 5px; display: block; }
+        /* 状态栏增强 */
+        .stat-row { width: 100%; max-width: 500px; display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .stat-item { background: var(--card); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #333; }
+        .stat-item small { display: block; font-size: 0.6rem; color: #888; margin-bottom: 2px; }
+        .stat-item b { display: block; color: var(--secondary); font-size: 0.95rem; }
+
+        .timer-panel { width: 100%; max-width: 500px; background: #111; border-radius: 20px; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #timer { font-size: 6rem; font-weight: 900; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; margin-bottom: 15px; }
+        #fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s linear; }
         
-        select, input {
-            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #3a3a3c;
-            background: #2c2c2e; color: #fff; font-size: 0.95rem; outline: none; box-sizing: border-box;
-        }
-
-        select:focus { border-color: var(--primary); }
-
-        .stat-grid {
-            width: 100%; max-width: 500px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;
-        }
-        .stat-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #333; }
-        .stat-card small { display: block; font-size: 0.65rem; color: #8e8e93; margin-bottom: 4px; }
-        .stat-card b { font-size: 1.1rem; color: var(--secondary); }
-
-        .timer-panel {
-            width: 100%; max-width: 500px; background: var(--card); border-radius: 24px; padding: 25px;
-            box-sizing: border-box; border-bottom: 6px solid var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6); position: relative;
-        }
-
-        #step-display { font-size: 1.5rem; color: var(--primary); text-align: center; font-weight: bold; }
-        #timer-display { font-size: 6.5rem; font-weight: 900; text-align: center; margin: 10px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+        .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; font-size: 0.8rem; }
+        .meta-box { background: #222; padding: 8px; border-radius: 6px; }
+        .btn-group { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-top: 15px; }
+        button { flex: 1; padding: 15px; border-radius: 10px; border: none; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .btn-start { background: var(--success); } .btn-pause { background: var(--danger); } .btn-next { background: #444; }
         
-        .progress-wrap { width: 100%; height: 8px; background: #3a3a3c; border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
-        #progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s linear; }
-
-        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .meta-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; }
-        .meta-box span { display: block; color: #8e8e93; font-size: 0.7rem; margin-bottom: 4px; }
-        .meta-box div { font-size: 0.9rem; line-height: 1.4; }
-
-        .action-bar { display: flex; gap: 12px; width: 100%; max-width: 500px; margin-top: 20px; }
-        button { flex: 1; padding: 18px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; color: white; cursor: pointer; }
-        .btn-start { background: var(--success); }
-        .btn-pause { background: var(--danger); }
-        .btn-next { background: #3a3a3c; }
-
-        @keyframes alert-bg { 50% { background: #7f0000; } }
-        .finished { animation: alert-bg 0.6s infinite; }
+        @keyframes alert { 50% { background: #500; } } .alarm { animation: alert 0.5s infinite; }
     </style>
 </head>
 <body>
 
-    <div class="config-area">
-        <div class="row">
-            <div>
-                <label>1. 工艺与型号</label>
-                <select id="recipe-sel" onchange="init()">
-                    <optgroup label="彩色负片 (C-41)">
-                        <option value="C41_STD">C-41 标准 (Gold/Portra)</option>
-                        <option value="LuckyC200">Lucky 乐凯 C200 特调</option>
-                    </optgroup>
-                    <optgroup label="电影胶片 (ECN-2)">
-                        <option value="ECN2_STD">ECN-2 标准电影工艺</option>
-                        <option value="Kodak5207">Kodak 5207 (250D)</option>
-                        <option value="Kodak2383">Kodak 2383 (C-41改冲)</option>
-                    </optgroup>
-                    <optgroup label="反转/正冲">
-                        <option value="E6_STD">E-6 标准反转片</option>
-                        <option value="XPRO_E6">负片正冲 (E-6药水)</option>
-                    </optgroup>
-                    <optgroup label="黑白 (B&W)">
-                        <option value="BW_D76">黑白标准 (D-76 1:1)</option>
-                        <option value="Kodak2460">Kodak 2460 (16mm正片)</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div>
-                <label>卷/层数</label>
-                <input type="number" id="rolls" value="1" min="1" max="5" onchange="init()">
-            </div>
+    <div class="config-box">
+        <label>1. 冲洗工艺与胶片型号</label>
+        <div style="display:flex; gap:10px;">
+            <select id="type-sel" onchange="updateModels()"></select>
+            <select id="model-sel" onchange="init()"></select>
         </div>
 
-        <label>2. 显影罐选择</label>
+        <label>2. 过期时长 (Expired Years)</label>
+        <select id="expiry-sel" onchange="init()" style="border-color: var(--warn); color: var(--warn);">
+            <option value="0">新鲜胶片 (保质期内)</option>
+            <option value="3">过期 1-5 年 (+5% 时间)</option>
+            <option value="8">过期 5-10 年 (+12% 时间)</option>
+            <option value="15">过期 10-20 年 (+25% 时间)</option>
+            <option value="25">过期 20年以上 (+40% 时间)</option>
+        </select>
+
+        <label>3. 显影罐配置</label>
         <select id="tank-sel" onchange="init()">
-            <optgroup label="Lab-Box (明室冲洗罐)">
-                <option value="labbox_135_r">Lab-Box 135 (滚冲 - 270ml)</option>
-                <option value="labbox_135_i">Lab-Box 135 (手冲 - 490ml)</option>
-                <option value="labbox_120_r">Lab-Box 120 (滚冲 - 300ml)</option>
-                <option value="labbox_120_i">Lab-Box 120 (手冲 - 500ml)</option>
+            <optgroup label="Lab-Box">
+                <option value="lb135r">Lab-Box 135 (滚冲 - 270ml)</option>
+                <option value="lb135i">Lab-Box 135 (手冲 - 490ml)</option>
             </optgroup>
-            <optgroup label="JOBO (德国)">
+            <optgroup label="JOBO">
                 <option value="j1510r">JOBO 1510 (滚冲 - 140ml)</option>
-                <option value="j1510i">JOBO 1510 (手冲 - 250ml)</option>
                 <option value="j1520r">JOBO 1520 (滚冲 - 240ml)</option>
             </optgroup>
-            <optgroup label="Paterson / AP">
-                <option value="p1">Paterson 单卷罐 (290ml)</option>
-                <option value="p2">Paterson 双卷罐 (580ml)</option>
-                <option value="ap1">AP 单卷罐 (375ml)</option>
-            </optgroup>
-            <optgroup label="LOMO UPB-16">
-                <option value="upb16_16">UPB-16 (16mm电影卷 - 1.2L)</option>
-                <option value="upb16_8">UPB-16 (8mm电影卷 - 1.1L)</option>
+            <optgroup label="Paterson/AP">
+                <option value="p1">Paterson 单卷 (290ml)</option>
+                <option value="upb16">UPB-16 (1.2L)</option>
             </optgroup>
         </select>
     </div>
 
-    <div class="stat-grid">
-        <div class="stat-card"><small>注药量</small><b id="vol-out">--</b></div>
-        <div class="stat-card"><small>时间补偿</small><b id="comp-out">0%</b></div>
-        <div class="stat-card"><small>步骤数</small><b id="step-count">--</b></div>
+    <div class="stat-row">
+        <div class="stat-item"><small>总显影补偿</small><b id="total-comp">0%</b></div>
+        <div class="stat-item"><small>注药量</small><b id="v-out">--</b></div>
+        <div class="stat-item"><small>药水疲劳</small><b id="p-comp">0%</b></div>
     </div>
 
-    <div style="width:100%; max-width:500px; margin-bottom: 20px;">
-        <label>药水补偿 (显影环节 %)</label>
-        <input type="range" id="comp-slide" min="0" max="40" step="5" value="0" oninput="init()">
+    <div style="width:100%; max-width:500px; margin-bottom:15px;">
+        <label>药水疲劳补偿 (仅针对显影剂衰减)</label>
+        <input type="range" id="comp-slide" min="0" max="30" step="5" value="0" oninput="init()">
     </div>
 
     <div class="timer-panel" id="t-panel">
-        <div id="step-display">准备绪</div>
-        <div id="timer-display">00:00</div>
-        <div class="progress-wrap"><div id="progress-fill"></div></div>
-        
-        <div class="meta-grid">
-            <div class="meta-box"><span>🌡️ 目标温度</span><div id="m-temp">--</div></div>
-            <div class="meta-box"><span>🔄 动作建议</span><div id="m-action">--</div></div>
-            <div class="meta-box" style="grid-column: span 2;"><span>⚠️ 核心笔记</span><div id="m-note">--</div></div>
+        <div id="step-name" style="color:var(--primary); font-weight:bold;">准备</div>
+        <div id="timer">00:00</div>
+        <div class="progress-bar"><div id="fill"></div></div>
+        <div class="meta">
+            <div class="meta-box"><small>🌡️ 建议温度</small><div id="m-temp">--</div></div>
+            <div class="meta-box"><small>🔄 搅拌动作</small><div id="m-act">--</div></div>
+            <div class="meta-box" style="grid-column: span 2;"><small>⚠️ 过期说明</small><div id="m-note">--</div></div>
         </div>
     </div>
 
-    <div class="action-bar">
-        <button class="btn-start" onclick="startTimer()">开始计时</button>
-        <button class="btn-pause" onclick="pauseTimer()">暂停</button>
-        <button class="btn-next" onclick="nextStep()">下一步</button>
+    <div class="btn-group">
+        <button class="btn-start" onclick="run()">开始计时</button>
+        <button class="btn-pause" onclick="stop()">暂停</button>
+        <button class="btn-next" onclick="next()">下一步</button>
     </div>
 
     <script>
         const noSleep = new NoSleep();
-        
-        const TANKS = {
-            labbox_135_r: 270, labbox_135_i: 490,
-            labbox_120_r: 300, labbox_120_i: 500,
-            j1510r: 140, j1510i: 250, j1520r: 240,
-            p1: 290, p2: 580, ap1: 375,
-            upb16_16: 1200, upb16_8: 1100
+        const TANKS = { lb135r:270, lb135i:490, j1510r:140, j1520r:240, p1:290, upb16:1200 };
+
+        const DATABASE = {
+            "C-41 (彩色负片)": {
+                "Kodak/Fuji/Lucky 系列": [{n:"预洗",t:60,tp:"38°",a:"慢",m:"标准流程"},{n:"彩显",t:195,tp:"38.0°",a:"翻转",m:"核心环节"},{n:"漂定",t:390,tp:"38°",a:"翻转",m:"排气"}],
+                "Phoenix 凤凰 200": [{n:"彩显",t:195,tp:"38.0°",a:"标准",m:"国产新卷"}],
+                "CineStill 800T/50D": [{n:"彩显",t:195,tp:"38.0°",a:"标准",m:"无须除碳"}]
+            },
+            "ECN-2 (电影负片)": {
+                "Kodak Vision3 500T/250D": [{n:"除碳",t:60,tp:"38°",a:"强",m:"必须去净碳层"},{n:"电影彩显",t:180,tp:"41.1°",a:"快",m:"高温ECN2"},{n:"停影",t:30,tp:"38°",a:"连",m:"秒停"}],
+                "Kodak 2383": [{n:"除碳",t:40,tp:"30°",a:"强",m:"除碳层"},{n:"彩显",t:150,tp:"35°",a:"慢",m:"降反差"}]
+            },
+            "B&W (黑白胶片)": {
+                "Ilford HP5/FP4": [{n:"显影(D76)",t:450,tp:"20°",a:"标准",m:"黑白显影"},{n:"定影",t:300,tp:"20°",a:"标准",m:"5分钟"}],
+                "Kodak Tri-X 400": [{n:"显影(D76)",t:465,tp:"20°",a:"标准",m:"黑白显影"}],
+                "Lucky SHD100": [{n:"显影(D76)",t:360,tp:"20°",a:"慢",m:"注意高光"}]
+            }
         };
 
-        const DATA = {
-            C41_STD: [{n:"1.预洗",t:60,tp:"38°C",a:"慢速",m:"润滑并预热"},{n:"2.彩显",t:195,tp:"38.0°C",a:"标准颠倒",m:"控温±0.3°C"},{n:"3.漂定",t:390,tp:"38°C",a:"翻转",m:"注意排气"},{n:"4.水洗",t:180,tp:"35°C",a:"换水",m:"洗净药水"}],
-            LuckyC200: [{n:"1.预洗",t:60,tp:"38°C",a:"轻微",m:"保护弱质药膜"},{n:"2.彩显",t:195,tp:"38.0°C",a:"标准",m:"乐凯特调"},{n:"3.漂定",t:390,tp:"38°C",a:"标准",m:"彻底脱银"}],
-            ECN2_STD: [{n:"1.除碳",t:45,tp:"38°C",a:"剧烈",m:"除碳至水清"},{n:"2.电影彩显",t:180,tp:"41.1°C",a:"快速",m:"ECN-2高温"},{n:"3.停影",t:30,tp:"38°C",a:"连续",m:"秒停"},{n:"4.漂定",t:360,tp:"38°C",a:"翻转",m:"脱银"}],
-            Kodak5207: [{n:"1.去碳",t:45,tp:"38°C",a:"剧烈",m:"Vision3电影卷"},{n:"2.电影彩显",t:180,tp:"41.1°C",a:"快速",m:"ECN-2标准"}],
-            Kodak2383: [{n:"1.除碳",t:30,tp:"30°C",a:"剧烈",m:"先除碳层"},{n:"2.彩显(低反差)",t:150,tp:"35°C",a:"慢速",m:"低温低反差冲洗"},{n:"3.漂定",t:420,tp:"35°C",a:"慢速",m:"加长时间"}],
-            XPRO_E6: [{n:"1.首显(E6)",t:360,tp:"38°C",a:"标准",m:"负正冲核心环节"},{n:"2.水洗",t:120,tp:"38°C",a:"彻底",m:"洗净"},{n:"3.彩显(E6)",t:240,tp:"38°C",a:"标准",m:"显色"}],
-            E6_STD: [{n:"1.首显",t:390,tp:"38°C",a:"严格",m:"决定曝光密度"},{n:"2.彩显",t:270,tp:"38°C",a:"标准",m:"决定色彩表现"}],
-            BW_D76: [{n:"1.显影(D76)",t:480,tp:"20°C",a:"常规",m:"参考卷身参数"},{n:"2.定影",t:300,tp:"20°C",a:"标准",m:"黑白定影"}],
-            Kodak2460: [{n:"1.显影(D76)",t:330,tp:"20°C",a:"极轻微",m:"高反差卷防过冲"},{n:"2.定影",t:300,tp:"20°C",a:"标准",m:"5分钟"}]
-        };
-
+        const typeSel = document.getElementById('type-sel');
+        const modelSel = document.getElementById('model-sel');
         let sIdx = 0, time = 0, total = 0, timer = null;
 
-        function init() {
-            const rKey = document.getElementById('recipe-sel').value;
-            const tKey = document.getElementById('tank-sel').value;
-            const rolls = document.getElementById('rolls').value;
-            const comp = parseInt(document.getElementById('comp-slide').value);
-
-            let vol = TANKS[tKey];
-            // 药量逻辑：JOBO按卷累加；LabBox/Paterson按单次操作计算
-            if(tKey.startsWith('j')) vol = vol * rolls;
-            
-            document.getElementById('vol-out').innerText = vol + "ml";
-            document.getElementById('comp-out').innerText = comp + "%";
-            document.getElementById('step-count').innerText = DATA[rKey].length;
-            
-            sIdx = 0;
-            loadStep();
+        function updateModels() {
+            const type = typeSel.value;
+            modelSel.innerHTML = "";
+            for(let m in DATABASE[type]) { modelSel.add(new Option(m, m)); }
+            init();
         }
 
-        function loadStep() {
-            const rKey = document.getElementById('recipe-sel').value;
-            const comp = parseInt(document.getElementById('comp-slide').value);
-            const step = DATA[rKey][sIdx];
+        function init() {
+            const type = typeSel.value;
+            const model = modelSel.value;
+            const tank = document.getElementById('tank-sel').value;
+            const potionComp = parseInt(document.getElementById('comp-slide').value);
+            const expYears = parseInt(document.getElementById('expiry-sel').value);
             
+            // 补偿算法：过期补偿百分比
+            let expComp = 0;
+            if(expYears >= 20) expComp = 40;
+            else if(expYears >= 10) expComp = 25;
+            else if(expYears >= 5) expComp = 12;
+            else if(expYears > 0) expComp = 5;
+
+            const totalComp = potionComp + expComp;
+            
+            document.getElementById('v-out').innerText = TANKS[tank] + "ml";
+            document.getElementById('p-comp').innerText = potionComp + "%";
+            document.getElementById('total-comp').innerText = totalComp + "%";
+            
+            sIdx = 0;
+            loadStep(DATABASE[type][model], totalComp);
+        }
+
+        function loadStep(steps, totalComp) {
+            const step = steps[sIdx];
             let baseT = step.t;
-            let finalT = (step.n.includes("显")) ? Math.round(baseT * (1 + comp/100)) : baseT;
+            let finalT = step.n.includes("显") ? Math.round(baseT * (1 + totalComp/100)) : baseT;
             
             time = finalT; total = finalT;
-            document.getElementById('step-display').innerText = step.n;
+            document.getElementById('step-name').innerText = step.n;
             document.getElementById('m-temp').innerText = step.tp;
-            document.getElementById('m-action').innerText = step.a;
-            document.getElementById('m-note').innerText = step.m;
-            document.getElementById('timer-display').innerText = fmt(time);
-            document.getElementById('progress-fill').style.width = "0%";
-            document.getElementById('t-panel').classList.remove('finished');
+            document.getElementById('m-act').innerText = step.a;
+            
+            // 动态提示
+            let expirySel = document.getElementById('expiry-sel');
+            let expMsg = expirySel.value > 0 ? "⚠️ 注意：已叠加过期补偿，显影时间已延长。" : "新鲜胶片流程。";
+            document.getElementById('m-note').innerText = step.m + " | " + expMsg;
+            
+            document.getElementById('timer').innerText = fmt(time);
+            document.getElementById('fill').style.width = "0%";
+            document.getElementById('t-panel').classList.remove('alarm');
         }
 
         function fmt(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
 
-        function startTimer() {
+        function run() {
             if(timer) return;
             noSleep.enable();
             timer = setInterval(() => {
                 if(time > 0) {
                     time--;
-                    document.getElementById('timer-display').innerText = fmt(time);
-                    document.getElementById('progress-fill').style.width = ((total-time)/total*100) + "%";
+                    document.getElementById('timer').innerText = fmt(time);
+                    document.getElementById('fill').style.width = ((total-time)/total*100) + "%";
                 } else {
                     clearInterval(timer); timer = null;
-                    document.getElementById('t-panel').classList.add('finished');
+                    document.getElementById('t-panel').classList.add('alarm');
                     beep();
                 }
             }, 1000);
         }
 
-        function pauseTimer() { clearInterval(timer); timer = null; }
+        function stop() { clearInterval(timer); timer = null; }
 
-        function nextStep() {
-            const rKey = document.getElementById('recipe-sel').value;
-            if(sIdx < DATA[rKey].length - 1) {
-                sIdx++; pauseTimer(); loadStep();
-            } else { alert("全流程完成！"); }
+        function next() {
+            const steps = DATABASE[typeSel.value][modelSel.value];
+            const comp = parseInt(document.getElementById('comp-slide').value) + (document.getElementById('expiry-sel').value > 0 ? parseInt(document.getElementById('total-comp').innerText) - parseInt(document.getElementById('comp-slide').value) : 0);
+            if(sIdx < steps.length - 1) {
+                sIdx++; stop(); 
+                // 获取最新总补偿
+                const tc = parseInt(document.getElementById('total-comp').innerText);
+                loadStep(steps, tc);
+            } else { alert("冲洗完成!"); }
         }
 
         function beep() { try { const ac=new AudioContext(), os=ac.createOscillator(); os.connect(ac.destination); os.start(); os.stop(ac.currentTime+0.5); } catch(e){} }
 
-        init();
+        for(let type in DATABASE) { typeSel.add(new Option(type, type)); }
+        updateModels();
     </script>
 </body>
 </html>
