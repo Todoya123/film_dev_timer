@@ -77,3 +77,159 @@
                 <label>胶片型号</label>
                 <select id="film" onchange="calcAll()">
                     <option value="C200">Lucky 乐凯 C200</option>
+                    <option value="5207">Kodak 5207 (Vision3)</option>
+                    <option value="2383">Kodak 2383 (正片)</option>
+                    <option value="2460">Kodak 2460 (16mm)</option>
+                </select>
+            </div>
+            <div>
+                <label>冲洗量 (卷数/轴数)</label>
+                <input type="number" id="roll-count" value="1" min="1" max="5" onchange="calcAll()">
+            </div>
+        </div>
+
+        <label>显影罐型号 & 模式</label>
+        <select id="tank" onchange="calcAll()">
+            <optgroup label="JOBO (德国)">
+                <option value="jobo_1510_r">JOBO 1510 (滚冲 - 140ml)</option>
+                <option value="jobo_1510_i">JOBO 1510 (手冲 - 250ml)</option>
+                <option value="jobo_1520_r">JOBO 1520 (滚冲 - 240ml)</option>
+                <option value="jobo_1520_i">JOBO 1520 (手冲 - 480ml)</option>
+                <option value="jobo_2520_r">JOBO 2520 (滚冲 - 270ml)</option>
+            </optgroup>
+            <optgroup label="Paterson (英国)">
+                <option value="pat_1">Paterson 单卷罐 (290ml)</option>
+                <option value="pat_2">Paterson 双卷罐 (580ml)</option>
+                <option value="pat_3">Paterson 三卷罐 (870ml)</option>
+            </optgroup>
+            <optgroup label="LOMO (俄制电影卷)">
+                <option value="upb16_16">UPB-16 (16mm 电影卷 - 1200ml)</option>
+                <option value="upb16_8">UPB-16 (8mm 电影卷 - 1100ml)</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="stat-bar">
+        <div class="stat-item"><small>建议总药量</small><span id="out-vol">--</span></div>
+        <div class="stat-item"><small>药水次数</small><span id="out-usage">1</span></div>
+        <div class="stat-item"><small>时间补偿</small><span id="out-comp">0%</span></div>
+    </div>
+
+    <div style="width:100%; max-width:500px; margin-bottom: 15px;">
+        <label>药水补偿调节 (衰减控制)</label>
+        <input type="range" id="comp-slider" min="0" max="40" step="5" value="0" oninput="calcAll()">
+    </div>
+
+    <div class="timer-card" id="timer-box">
+        <h2 id="step-name">准备绪</h2>
+        <div id="timer-text">00:00</div>
+        <div class="progress-box"><div id="progress-bar"></div></div>
+        <div class="details">
+            <div class="detail-box"><b>🌡️ 温度控值</b><div id="det-tp">--</div></div>
+            <div class="detail-box"><b>🔄 动作提示</b><div id="det-ac">--</div></div>
+            <div class="detail-box" style="grid-column: span 2;"><b>📝 核心要点</b><div id="det-ms">--</div></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-start" onclick="start()">开始</button>
+        <button class="btn-pause" onclick="pause()">暂停</button>
+        <button class="btn-next" onclick="next()">跳过</button>
+    </div>
+
+    <script>
+        const noSleep = new NoSleep();
+        
+        // 显影罐药量数据库
+        const TANK_DB = {
+            jobo_1510_r: 140, jobo_1510_i: 250,
+            jobo_1520_r: 240, jobo_1520_i: 480,
+            jobo_2520_r: 270,
+            pat_1: 290, pat_2: 580, pat_3: 870,
+            upb16_16: 1200, upb16_8: 1100
+        };
+
+        const RECIPES = {
+            C200: [{n:"预洗",t:60,tp:"38°",a:"轻微",m:"润滑药膜"},{n:"彩显",t:195,tp:"38.0°",a:"标准颠倒",m:"控温关键"},{n:"漂定",t:390,tp:"38°",a:"标准",m:"彻底脱银"}],
+            5207: [{n:"除碳",t:45,tp:"38°",a:"强力摇晃",m:"水清为止"},{n:"电影彩显",t:180,tp:"41.1°",a:"快速",m:"高温ECN2工艺"},{n:"停影",t:30,tp:"38°",a:"连续",m:"秒停"}],
+            2383: [{n:"去碳",t:30,tp:"30°",a:"强力",m:"先除碳层"},{n:"彩显",t:150,tp:"35°",a:"极轻微",m:"低温控制反差"},{n:"漂定",t:420,tp:"35°",a:"标准",m:"确保透明度"}],
+            2460: [{n:"显影(D76)",t:360,tp:"20°",a:"慢速",m:"保持细节"},{n:"定影",t:300,tp:"20°",a:"标准",m:"常规黑白定影"}]
+        };
+
+        let sIdx = 0, time = 0, total = 0, timer = null;
+
+        function calcAll() {
+            const tKey = document.getElementById('tank').value;
+            const rolls = document.getElementById('roll-count').value;
+            const comp = document.getElementById('comp-slider').value;
+            
+            // 计算药量 (Paterson/UPB等按罐体容积，卷数仅作参考；JOBO按卷数累加)
+            let vol = TANK_DB[tKey];
+            if(tKey.startsWith('jobo')) vol = vol * rolls; 
+
+            document.getElementById('out-vol').innerText = vol + "ml";
+            document.getElementById('out-comp').innerText = comp + "%";
+            
+            if(!timer) loadStep();
+        }
+
+        function loadStep() {
+            const f = document.getElementById('film').value;
+            const comp = parseInt(document.getElementById('comp-slider').value);
+            const step = RECIPES[f][sIdx];
+            
+            // 显影步骤自动应用补偿
+            let baseT = step.t;
+            let finalT = step.n.includes("显") ? Math.round(baseT * (1 + comp/100)) : baseT;
+            
+            time = finalT; total = finalT;
+            document.getElementById('step-name').innerText = step.n;
+            document.getElementById('det-tp').innerText = step.tp;
+            document.getElementById('det-ac').innerText = step.a;
+            document.getElementById('det-ms').innerText = step.m;
+            document.getElementById('timer-text').innerText = fmt(time);
+            document.getElementById('progress-bar').style.width = "0%";
+        }
+
+        function fmt(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
+
+        function start() {
+            if(timer) return;
+            noSleep.enable();
+            document.getElementById('timer-box').classList.remove('alarm');
+            timer = setInterval(() => {
+                if(time > 0) {
+                    time--;
+                    document.getElementById('timer-text').innerText = fmt(time);
+                    document.getElementById('progress-bar').style.width = ((total-time)/total*100) + "%";
+                } else {
+                    clearInterval(timer); timer = null;
+                    document.getElementById('timer-box').classList.add('alarm');
+                    beep();
+                }
+            }, 1000);
+        }
+
+        function pause() { clearInterval(timer); timer = null; }
+
+        function next() {
+            const f = document.getElementById('film').value;
+            if(sIdx < RECIPES[f].length - 1) {
+                sIdx++; pause(); loadStep();
+                document.getElementById('timer-box').classList.remove('alarm');
+            } else { alert("全流程冲洗已完成！"); }
+        }
+
+        function beep() {
+            try {
+                const ac = new AudioContext();
+                const os = ac.createOscillator();
+                os.connect(ac.destination);
+                os.start(); os.stop(ac.currentTime + 0.6);
+            } catch(e) {}
+        }
+
+        calcAll();
+    </script>
+</body>
+</html>
