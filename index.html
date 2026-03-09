@@ -3,92 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暗房全能大师 - 终极全工艺版</title>
+    <title>暗房全能大师 - 全工艺完整版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
     <style>
         :root {
             --bg: #09090b; --card: #18181b; --primary: #fbbf24;
             --secondary: #22d3ee; --text: #f4f4f5;
-            --success: #10b981; --danger: #ef4444; --accent: #ec4899;
+            --success: #10b981; --danger: #ef4444; --accent: #a855f7;
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         
+        /* 布局 */
         .tabs { display: flex; width: 100%; max-width: 600px; background: #27272a; border-radius: 12px; margin-bottom: 12px; padding: 4px; overflow-x: auto; }
-        .tab { flex: 1; min-width: 90px; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 0.85rem; transition: 0.3s; white-space: nowrap; }
+        .tab { flex: 1; min-width: 80px; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 0.8rem; transition: 0.3s; white-space: nowrap; }
         .tab.active { background: var(--primary); color: #000; }
 
         .view-section { width: 100%; max-width: 600px; display: none; }
         .view-section.active { display: block; }
 
-        .config-box { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #27272a; }
-        label { font-size: 0.7rem; color: var(--primary); font-weight: 600; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3f3f46; background: #09090b; color: #fff; font-size: 0.9rem; margin-bottom: 10px; box-sizing: border-box; }
+        .config-box { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #27272a; }
+        label { font-size: 0.65rem; color: var(--primary); font-weight: 600; margin-bottom: 4px; display: block; }
+        select, input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3f3f46; background: #000; color: #fff; font-size: 0.9rem; margin-bottom: 10px; box-sizing: border-box; }
         
-        .timer-panel { background: #000; border-radius: 20px; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-        #timer { font-size: 6rem; font-weight: 900; margin: 5px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
-        
+        /* 计时器核心 */
+        .timer-panel { background: #000; border-radius: 20px; padding: 20px; text-align: center; border-bottom: 5px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        #timer { font-size: 5.5rem; font-weight: 900; margin: 5px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
         .prog-bg { width: 100%; height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; margin-bottom: 15px; }
         #prog-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s linear; }
         
         .meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: left; }
-        .meta-box { background: #18181b; padding: 8px; border-radius: 8px; border: 1px solid #27272a; font-size: 0.75rem; }
+        .meta-box { background: #18181b; padding: 8px; border-radius: 8px; border: 1px solid #27272a; font-size: 0.7rem; }
         .meta-box small { color: #a1a1aa; display: block; margin-bottom: 2px; }
 
-        .lab-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .lab-table th { color: var(--primary); text-align: left; padding: 8px; }
-        .lab-table td { padding: 8px; border-bottom: 1px solid #27272a; }
+        /* 实验室表格 */
+        .lab-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .lab-table th { color: var(--primary); text-align: left; padding: 6px; border-bottom: 1px solid #3f3f46; }
+        .lab-table td { padding: 8px 6px; border-bottom: 1px solid #27272a; }
+        .chem-val { color: var(--secondary); font-weight: bold; }
 
-        .res-box { background: #000; padding: 15px; border-radius: 10px; border-left: 4px solid var(--secondary); margin-top: 5px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        button { flex: 1; padding: 18px; border-radius: 12px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
+        button { flex: 1; padding: 15px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('timer-view')">⏱️ 冲洗计时</div>
-        <div class="tab" onclick="switchTab('lab-view')">🧪 药水实验室</div>
-        <div class="tab" onclick="switchTab('calc-view')">🧮 算法计算</div>
+        <div class="tab active" onclick="switchTab('timer-view')">⏱️ 计时</div>
+        <div class="tab" onclick="switchTab('lab-view')">🧪 配药</div>
+        <div class="tab" onclick="switchTab('calc-view')">🧮 计算</div>
     </div>
 
     <div id="timer-view" class="view-section active">
         <div class="config-box">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div style="display:grid; grid-template-columns: 1.2fr 1fr; gap:8px;">
                 <div>
-                    <label>冲洗工艺</label>
+                    <label>工艺流程</label>
                     <select id="proc-sel" onchange="syncModels()"></select>
                 </div>
                 <div>
-                    <label>胶片数据库</label>
+                    <label>胶片/设定</label>
                     <select id="film-sel" onchange="initTimer()"></select>
                 </div>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div>
-                    <label>装药容量 (ml)</label>
-                    <input type="number" id="v-input" value="500" oninput="initTimer()">
-                </div>
-                <div>
-                    <label>疲劳/过期补偿 (%)</label>
-                    <input type="number" id="comp-input" value="0" oninput="initTimer()">
-                </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <div><label>单罐药量(ml)</label><input type="number" id="v-input" value="500" oninput="initTimer()"></div>
+                <div><label>显影补偿(%)</label><input type="number" id="comp-input" value="0" oninput="initTimer()"></div>
             </div>
         </div>
 
-        <div class="timer-panel" id="panel">
-            <div id="step-name" style="color:var(--primary); font-weight:bold; font-size:1.2rem;">READY</div>
+        <div class="timer-panel">
+            <div id="step-name" style="color:var(--primary); font-weight:bold; font-size:1.1rem;">READY</div>
             <div id="timer">00:00</div>
             <div class="prog-bg"><div id="prog-fill"></div></div>
             <div class="meta">
                 <div class="meta-box"><small>🌡️ 目标温度</small><div id="m-temp">--</div></div>
-                <div class="meta-box" style="color:var(--secondary);"><small>🧪 标准 pH</small><div id="m-ph">--</div></div>
-                <div class="meta-box"><small>🔄 翻转动作</small><div id="m-act">标准翻转</div></div>
+                <div class="meta-box"><small>🧪 标准 pH</small><div id="m-ph" style="color:var(--secondary)">--</div></div>
+                <div class="meta-box"><small>🔄 搅拌动作</small><div id="m-act">标准翻转</div></div>
                 <div class="meta-box" style="grid-column: span 3;"><small>📝 工业贴士</small><div id="m-note">--</div></div>
             </div>
         </div>
 
         <div class="btn-group">
-            <button class="btn-start" style="background:var(--success);" onclick="run()">开始</button>
+            <button style="background:var(--success);" onclick="run()">开始</button>
             <button style="background:var(--danger);" onclick="stop()">暂停</button>
             <button style="background:var(--secondary); color:#000;" onclick="next()">下一步</button>
         </div>
@@ -96,15 +92,11 @@
 
     <div id="lab-view" class="view-section">
         <div class="config-box">
-            <label>1. 套药型号</label>
-            <select id="kit-sel" onchange="updateLab()">
-                <option value="ecn2_gg">ECN-2 (龟龟/Kodak标准)</option>
-                <option value="e6_fuji">E-6 (Fuji Hunt/柯达标准)</option>
-                <option value="bw_std">B&W (D76/ID11/HC110等)</option>
-            </select>
-            <label>2. 目标容量 (ml)</label>
+            <label>1. 选择配制目标</label>
+            <select id="kit-sel" onchange="updateLab()"></select>
+            <label>2. 目标总量 (ml)</label>
             <input type="number" id="lab-val" value="500" oninput="updateLab()">
-            <div class="res-box" style="border-left-color:var(--primary);">
+            <div style="background:#000; padding:10px; border-radius:8px; border:1px solid #27272a;">
                 <table class="lab-table" id="lab-table"></table>
             </div>
         </div>
@@ -112,95 +104,98 @@
 
     <div id="calc-view" class="view-section">
         <div class="config-box">
-            <label>1. Ilford 温度时间修正</label>
+            <label>温度校正 (基于 Ilford 20°C 曲线)</label>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <input type="number" id="c-bt" placeholder="20°C时间" value="6">
-                <input type="number" id="c-tt" placeholder="当前液温" value="24">
+                <input type="number" id="c-bt" placeholder="基准时间" value="6">
+                <input type="number" id="c-tt" placeholder="实测温度" value="24">
             </div>
-            <div class="res-box">修正后显影时间：<b id="res-temp" style="color:var(--secondary);">--</b> 分钟</div>
-        </div>
-        <div class="config-box">
-            <label>2. 倒易律失效计算 (Ilford HP5/Delta)</label>
-            <input type="number" id="c-ms" placeholder="测光秒数" value="10">
-            <div class="res-box">实际所需曝光：<b id="res-recip" style="color:var(--secondary);">--</b> 秒</div>
+            <div style="color:var(--secondary); font-weight:bold;">建议时间：<span id="res-temp">--</span> min</div>
         </div>
     </div>
 
     <script>
         const noSleep = new NoSleep();
-        
-        // --- 核心数据库：复原所有工艺 ---
+
+        // --- 全工艺数据库 ---
         const PROCESS_DB = {
-            "ECN-2 (电影工艺)": [
-                {n:"除碳", t:60, tp:"27±1°C", ph:"9.2-10.0", m:"禁止预洗！停留20s倒出，清水洗净。"},
-                {n:"预热", t:30, tp:"42°C", ph:"7.0", m:"防止显影温降。"},
-                {n:"电影彩显", isDev:true, tp:"41.1±0.1°C", ph:"10.25±0.05", m:"CD-3显影。1-6卷3min，后每2卷延时。"},
-                {n:"停显", t:30, tp:"27-38°C", ph:"0.8-1.5", m:"瞬间终止反应。"},
-                {n:"水洗", t:30, tp:"27-38°C", ph:"7.0", m:"洗净停显液。"},
-                {n:"漂白", t:195, tp:"27±1°C", ph:"4.75±0.2", m:"3分15秒。不足会导致暗部发绿。"},
-                {n:"定影", t:180, tp:"38±1°C", ph:"7.75-7.93", m:"1-6卷3min。后期建议8min。"},
-                {n:"省水水洗", t:120, tp:"27-38°C", ph:"7.0", m:"5/10/20次翻转法。"},
-                {n:"稳定", t:60, tp:"常温", ph:"-", m:"直接晾干，不可水洗。"}
+            "C-41 (标准彩负)": [
+                {n:"预洗/预热", t:60, tp:"38°C", ph:"7.0", m:"软化药膜，防止温降。"},
+                {n:"C-41 彩显", isDev:true, tp:"37.8±0.1°C", ph:"10.0-10.2", m:"搅拌：前30秒连续，后每30秒翻转2次。"},
+                {n:"漂白", t:260, tp:"35-40°C", ph:"4.5-5.5", m:"4分20秒。注意通气搅动。"},
+                {n:"水洗", t:65, tp:"30-40°C", ph:"7.0", m:"清水洗净漂白液。"},
+                {n:"定影", t:260, tp:"35-40°C", ph:"6.5-7.5", m:"定影必须彻底，否则底片发浑。"},
+                {n:"水洗", t:195, tp:"30-40°C", ph:"7.0", m:"3分15秒，建议流流水。"},
+                {n:"稳定", t:65, tp:"常温", ph:"7.0-9.0", m:"最后一步，含除菌防霉成分。"}
             ],
-            "E-6 (标准反转)": [
-                {n:"首显", isDev:true, tp:"38.0°C", ph:"9.6-9.9", m:"决定高光。"},
-                {n:"首显水洗", t:120, tp:"38°C", ph:"7.0", m:"彻底洗净！"},
-                {n:"反转/二次曝光", t:120, tp:"38°C", ph:"-", m:"如果是药液反转，pH约3.5-4.5。"},
-                {n:"彩显", t:360, tp:"38.0°C", ph:"11.7-12.2", m:"强碱激发色彩。"},
-                {n:"预漂/调节", t:120, tp:"38°C", ph:"6.0-6.5", m:"保护漂白液。"},
-                {n:"漂白", t:360, tp:"38°C", ph:"5.5-5.8", m:"-"},
-                {n:"定影", t:240, tp:"38°C", ph:"6.5-7.5", m:"-"},
-                {n:"稳定", t:60, tp:"常温", ph:"-", m:"-"}
+            "ECN-2 (电影卷)": [
+                {n:"除碳", t:60, tp:"27±1°C", ph:"9.2", m:"禁止水洗！20s后倒出，再反复冲洗至水清。"},
+                {n:"彩显", isDev:true, tp:"41.1±0.1°C", ph:"10.25", m:"CD-3显影。温控极其关键。"},
+                {n:"停显", t:30, tp:"27-38°C", ph:"1.2", m:"醋酸或硫酸停显。"},
+                {n:"漂白", t:180, tp:"27±1°C", ph:"4.7", m:"3分钟。注意药力疲劳补偿。"},
+                {n:"定影", t:180, tp:"38±1°C", ph:"7.8", m:"3分钟。过期药水建议加倍时间。"},
+                {n:"省水水洗", t:120, tp:"常温", ph:"7.0", m:"Ilford法：5/10/20次翻转。"},
+                {n:"稳定", t:60, tp:"常温", ph:"-", m:"直接挂干。"}
             ],
-            "B&W (标准黑白)": [
-                {n:"显影", isDev:true, tp:"20°C", ph:"8.5-10.5", m:"搅拌：前30秒连续，后每分钟前10秒2次。"},
-                {n:"停显", t:30, tp:"20°C", ph:"1.5-3.0", m:"柠檬酸或醋酸。"},
-                {n:"定影", t:300, tp:"20°C", ph:"4.0-5.5", m:"建议快速定影液。"},
-                {n:"省水水洗", t:180, tp:"20°C", ph:"7.0", m:"5/10/20次翻转。"}
+            "E-6 (6浴反转)": [
+                {n:"首显", isDev:true, tp:"38.0±0.3°C", ph:"9.6", m:"决定高光细节。"},
+                {n:"首显水洗", t:120, tp:"38°C", ph:"7.0", m:"洗净显影液防止污染下一步。"},
+                {n:"反转浴", t:120, tp:"38°C", ph:"4.0", m:"化学反转，使未曝光银盐可显。"},
+                {n:"彩显", t:360, tp:"38.0°C", ph:"11.9", m:"形成色彩。"},
+                {n:"预漂(调节)", t:120, tp:"38°C", ph:"6.2", m:"保护漂白液寿命。"},
+                {n:"漂白", t:360, tp:"38°C", ph:"5.7", m:"彻底氧化银像。"},
+                {n:"定影", t:240, tp:"38°C", ph:"7.0", m:"溶解银盐。"},
+                {n:"最后水洗", t:240, tp:"35°C", ph:"7.0", m:"洗净所有残留。"},
+                {n:"稳定", t:60, tp:"常温", ph:"-", m:"防霉处理。"}
+            ],
+            "彩负正冲 (X-Pro)": [
+                {n:"E6首显", isDev:true, tp:"38.0°C", ph:"9.6", m:"黑白首显是关键，决定最终对比度。"},
+                {n:"水洗", t:120, tp:"38°C", ph:"7.0", m:"-"},
+                {n:"E6彩显", t:360, tp:"38.0°C", ph:"11.9", m:"形成极端色彩偏移。"},
+                {n:"E6漂定", t:480, tp:"38°C", ph:"-", m:"脱银过程，建议适当延长时间。"},
+                {n:"水洗", t:240, tp:"常温", ph:"7.0", m:"-"}
             ],
             "黑白正冲 (Reversal)": [
-                {n:"首显(强显)", isDev:true, tp:"20°C", ph:"10.0-10.5", m:"通常需加入硫氰酸钾。"},
-                {n:"漂白(酸性)", t:300, tp:"20°C", ph:"1.0-1.5", m:"极强酸！高锰酸钾或重铬酸钾。"},
-                {n:"清液", t:120, tp:"20°C", ph:"5.0-6.0", m:"清除漂白残留。"},
-                {n:"二次显影", t:300, tp:"20°C", ph:"9.5-10.0", m:"室外光或药液显影。"},
-                {n:"定影", t:300, tp:"20°C", ph:"4.5-5.5", m:"常规定影。"}
+                {n:"首显(黑白)", isDev:true, tp:"20°C", ph:"10.2", m:"高能量显影，彻底拉开密度。"},
+                {n:"漂白", t:300, tp:"20°C", ph:"1.0", m:"酸性高锰酸钾。洗掉黑白负像。"},
+                {n:"清液", t:120, tp:"20°C", ph:"5.5", m:"洗掉漂白液的紫色残留。"},
+                {n:"二次显影", t:300, tp:"20°C", ph:"10.0", m:"将剩余银盐显影成正像。"},
+                {n:"定影", t:300, tp:"20°C", ph:"5.0", m:"固化图像。"}
             ],
-            "彩负正冲 (C41 in E6)": [
-                {n:"E6首显", isDev:true, tp:"38.0°C", ph:"9.6-9.9", m:"产生黑白负像。"},
-                {n:"E6彩显", t:360, tp:"38.0°C", ph:"11.7-12.2", m:"强行反转产生色彩。"},
-                {n:"E6漂定", t:420, tp:"38°C", ph:"-", m:"脱银。"}
+            "B&W (负片标准)": [
+                {n:"显影", isDev:true, tp:"20°C", ph:"8.5-10.0", m:"前30秒连续，之后每分钟前10秒2次。"},
+                {n:"停显", t:30, tp:"20°C", ph:"2.0", m:"-"},
+                {n:"定影", t:300, tp:"20°C", ph:"5.0", m:"5分钟，直到片基通透。"},
+                {n:"省水水洗", t:180, tp:"20°C", ph:"7.0", m:"Ilford法：5/10/20次翻转。"}
             ]
         };
 
-        const FILM_TIME = {
-            "ECN-2 (电影工艺)": { "Kodak 5207/5219": 180, "Fuji Eterna": 180 },
-            "E-6 (标准反转)": { "Fuji Provia 100F": 360, "Kodak E100": 360 },
-            "B&W (标准黑白)": { "HP5+ (ID11)": 450, "Delta 100": 540, "Tri-X (D76)": 465 },
-            "黑白正冲 (Reversal)": { "SHD100/HP5": 480, "Fomapan 100R": 300 },
-            "彩负正冲 (C41 in E6)": { "Kodak Gold (X-PRO)": 390, "Fuji C200 (X-PRO)": 390 }
+        const FILM_MAP = {
+            "C-41 (标准彩负)": { "通用彩负 (Gold/Portra)": 195 },
+            "ECN-2 (电影卷)": { "5207/5219 (CD-3)": 180 },
+            "E-6 (6浴反转)": { "Provia 100F/E100": 360 },
+            "彩负正冲 (X-Pro)": { "Kodak Gold 正冲": 360 },
+            "黑白正冲 (Reversal)": { "Fomapan 100R": 300, "HP5 正冲": 480 },
+            "B&W (负片标准)": { "HP5+ (ID-11)": 450, "Delta 100": 540 }
         };
 
-        // --- 药水实验室配比 ---
-        const LAB_KITS = {
-            ecn2_gg: [
-                {n:"彩显工作液", r:[{m:"蒸馏水", v:300}, {m:"彩显A", v:71}, {m:"彩显B", v:19}, {m:"开始液", v:8}, {m:"补水至", v:500}]},
-                {n:"漂白液", r:[{m:"水",v:330}, {m:"漂白原液",v:170}]},
-                {n:"定影液", r:[{m:"水",v:350}, {m:"定影原液",v:150}]}
-            ],
-            e6_fuji: [
-                {n:"首显(1+4)", r:[{m:"水", v:400}, {m:"FD原液", v:100}]},
-                {n:"彩显", r:[{m:"水", v:315}, {m:"CD-A", v:92.5}, {m:"CD-B", v:92.5}]}
-            ]
+        // --- 完善的药水配制数据库 ---
+        const LAB_CONFIG = {
+            "ecn2_dev": { n: "ECN-2 电影彩显 (500ml)", r: [{m:"水",v:300},{m:"A液",v:71},{m:"B液",v:19},{m:"开始液",v:8},{m:"补水至",v:500}]},
+            "c41_dev": { n: "C-41 彩显工作液 (500ml)", r: [{m:"水",v:400},{m:"A液",v:40},{m:"B液",v:10},{m:"C液",v:10},{m:"补水至",v:500}]},
+            "e6_fd": { n: "E-6 首显 FD (500ml)", r: [{m:"水",v:400},{m:"FD原液",v:100}]},
+            "e6_cd": { n: "E-6 彩显 CD (500ml)", r: [{m:"水",v:315},{m:"CD-A",v:92.5},{m:"CD-B",v:92.5}]},
+            "ecn2_bl": { n: "ECN-2 漂白 (500ml)", r: [{m:"水",v:330},{m:"漂白原液",v:170}]},
+            "ecn2_fix": { n: "ECN-2 定影 (500ml)", r: [{m:"水",v:350},{m:"定影原液",v:150}]}
         };
 
-        let sIdx = 0, time = 0, total = 0, timer = null;
+        let sIdx=0, time=0, total=0, timer=null;
 
         function switchTab(id) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
-            if(id === 'calc-view') startCalc();
+            if(id==='lab-view') updateLab();
         }
 
         // --- 计时器逻辑 ---
@@ -208,7 +203,7 @@
             const p = document.getElementById('proc-sel').value;
             const f = document.getElementById('film-sel');
             f.innerHTML = "";
-            for(let m in FILM_TIME[p]) { f.add(new Option(m, m)); }
+            for(let m in FILM_MAP[p]) f.add(new Option(m, m));
             initTimer();
         }
 
@@ -217,7 +212,7 @@
             const m = document.getElementById('film-sel').value;
             const comp = parseInt(document.getElementById('comp-input').value) || 0;
             sIdx = 0;
-            loadStep(PROCESS_DB[p], FILM_TIME[p][m], comp);
+            loadStep(PROCESS_DB[p], FILM_MAP[p][m], comp);
         }
 
         function loadStep(steps, baseTime, comp) {
@@ -227,11 +222,10 @@
             time = dur; total = dur;
             document.getElementById('step-name').innerText = step.n;
             document.getElementById('timer').innerText = fmt(time);
-            document.getElementById('m-temp').innerText = step.tp || "20°C";
-            document.getElementById('m-ph').innerText = step.ph || "-";
+            document.getElementById('m-temp').innerText = step.tp;
+            document.getElementById('m-ph').innerText = step.ph;
             document.getElementById('m-note').innerText = step.m;
             document.getElementById('prog-fill').style.width = "0%";
-            document.getElementById('panel').classList.remove('alarm');
         }
 
         function fmt(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
@@ -246,59 +240,47 @@
                     document.getElementById('prog-fill').style.width = ((total-time)/total*100) + "%";
                 } else {
                     clearInterval(timer); timer = null;
-                    document.getElementById('panel').classList.add('alarm');
                     beep();
                 }
             }, 1000);
         }
 
         function stop() { clearInterval(timer); timer = null; }
+        
         function next() {
             const p = document.getElementById('proc-sel').value;
             const m = document.getElementById('film-sel').value;
-            if(sIdx < PROCESS_DB[p].length - 1) { sIdx++; stop(); loadStep(PROCESS_DB[p], FILM_TIME[p][m], 0); }
+            if(sIdx < PROCESS_DB[p].length - 1) { sIdx++; stop(); loadStep(PROCESS_DB[p], FILM_MAP[p][m], 0); }
         }
 
         // --- 实验室逻辑 ---
         function updateLab() {
-            const kit = document.getElementById('kit-sel').value;
+            const key = document.getElementById('kit-sel').value;
             const val = parseFloat(document.getElementById('lab-val').value) || 500;
             const table = document.getElementById('lab-table');
-            table.innerHTML = "<tr><th>药液</th><th>成分</th><th>用量</th></tr>";
-            const data = LAB_KITS[kit];
-            if(!data) return;
-            data.forEach(s => {
-                const ratio = val / 500;
-                s.r.forEach((item, i) => {
-                    const row = table.insertRow();
-                    if(i === 0) row.insertCell().innerHTML = `<b>${s.n}</b>`; else row.insertCell();
-                    row.insertCell().innerText = item.m;
-                    row.insertCell().innerText = (item.v * ratio).toFixed(1) + "ml";
-                });
+            table.innerHTML = "<tr><th>成分</th><th>用量</th></tr>";
+            const item = LAB_CONFIG[key];
+            const ratio = val / 500;
+            item.r.forEach(r => {
+                const row = table.insertRow();
+                row.insertCell().innerText = r.m;
+                row.insertCell().innerHTML = `<span class="chem-val">${(r.v * ratio).toFixed(1)} ml</span>`;
             });
         }
 
-        // --- 计算辅助逻辑 ---
-        function startCalc() {
-            const ids = ['c-bt', 'c-tt', 'c-ms'];
-            ids.forEach(id => document.getElementById(id).oninput = doCalc);
-            doCalc();
-        }
-
-        function doCalc() {
+        // --- 计算逻辑 ---
+        document.getElementById('c-bt').oninput = document.getElementById('c-tt').oninput = () => {
             const bt = parseFloat(document.getElementById('c-bt').value);
             const tt = parseFloat(document.getElementById('c-tt').value);
-            const factor = Math.pow(0.91, tt - 20); // Ilford温度公式
-            document.getElementById('res-temp').innerText = (bt * factor).toFixed(1);
-
-            const ms = parseFloat(document.getElementById('c-ms').value);
-            document.getElementById('res-recip').innerText = Math.round(Math.pow(ms, 1.31)); // HP5倒易律
-        }
+            const res = bt * Math.pow(0.91, tt - 20);
+            document.getElementById('res-temp').innerText = res.toFixed(1);
+        };
 
         function beep() { try { const ac=new AudioContext(), os=ac.createOscillator(); os.connect(ac.destination); os.start(); os.stop(ac.currentTime+0.5); } catch(e){} }
 
-        // 初始化
-        for(let k in PROCESS_DB) document.getElementById('proc-sel').add(new Option(k, k));
+        // 初始化加载
+        for(let p in PROCESS_DB) document.getElementById('proc-sel').add(new Option(p, p));
+        for(let k in LAB_CONFIG) document.getElementById('kit-sel').add(new Option(LAB_CONFIG[k].n, k));
         syncModels();
         updateLab();
     </script>
