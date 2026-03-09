@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暗房全能大师 - pH专业版</title>
+    <title>暗房全能大师 - ECN-2 严选版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
     <style>
         :root {
             --bg: #09090b; --card: #18181b; --primary: #fbbf24;
             --secondary: #22d3ee; --text: #f4f4f5;
-            --success: #10b981; --danger: #ef4444; --acid: #ec4899;
+            --success: #10b981; --danger: #ef4444;
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .config-box { width: 100%; max-width: 520px; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #27272a; }
@@ -75,21 +75,21 @@
 
     <div class="stat-row">
         <div class="stat-item"><small>注药量</small><b id="v-out">--</b></div>
-        <div class="stat-item"><small>疲劳补偿</small><b id="p-out">0%</b></div>
+        <div class="stat-item"><small>显影疲劳度补偿</small><b id="p-out">0%</b></div>
         <div class="stat-item"><small>当前步骤</small><b id="s-out">--</b></div>
     </div>
 
     <input type="range" id="comp-slide" min="0" max="30" step="5" value="0" style="width:100%; max-width:520px; margin-bottom:15px;" oninput="init()">
 
     <div class="timer-panel" id="panel">
-        <div id="step-name" style="color:var(--primary); font-weight:bold; font-size:1.2rem;">STANDBY</div>
+        <div id="step-name" style="color:var(--primary); font-weight:bold; font-size:1.3rem;">STANDBY</div>
         <div id="timer">00:00</div>
         <div class="prog-bg"><div id="prog-fill"></div></div>
         <div class="meta">
             <div class="meta-box"><small>🌡️ 温度</small><div id="m-temp">--</div></div>
             <div class="meta-box"><small>🔄 动作</small><div id="m-act">--</div></div>
             <div class="meta-box" style="color:var(--secondary);"><small>🧪 pH范围</small><div id="m-ph">--</div></div>
-            <div class="meta-box note-box"><small>📝 专业贴士</small><div id="m-note">--</div></div>
+            <div class="meta-box note-box"><small>📝 步骤要求</small><div id="m-note" style="line-height:1.4;">--</div></div>
         </div>
     </div>
 
@@ -106,52 +106,48 @@
         const DB = {
             "C-41 (彩负)": { "Fuji C200 / C400": 195, "Fuji Pro 400H": 195, "Lucky 乐凯 C200": 205, "Kodak Gold/Portra": 195, "Phoenix 凤凰 200": 195 },
             "E-6 (标准反转)": { "Fuji Provia 100F": 360, "Fuji Velvia 50/100": 360, "Kodak Ektachrome E100": 360 },
-            "ECN-2 (电影负片)": { "Kodak 5203/5207/5219": 180, "Fuji Eterna 系列": 180 },
+            "ECN-2 (标准工艺)": { "Kodak 5203/5207/5219": 180, "Fuji Eterna 系列": 180 },
             "D-94A (电影正片)": { "Kodak 5294/7294": 360, "Kodak 2460": 330 },
             "彩负正冲 (C41 in E6)": { "Fuji C200 (X-PRO)": 390, "Kodak Gold (X-PRO)": 390 },
             "黑白正冲 (BW Reversal)": { "Lucky SHD100 (正冲)": 420, "Kodak 2460 (正冲)": 480, "Fomapan 100R": 300 },
             "B&W (标准黑白)": { "Ilford HP5+/FP4+": 450, "Fomapan 100/200": 420, "Kodak Tri-X": 465, "Lucky SHD100 New": 360 }
         };
 
-        // pH 范围：酸性(1-6), 中性(7), 碱性(8-14)
         const STEPS = {
+            "ECN-2 (标准工艺)": [
+                {n:"1. 除碳",t:60,tp:"27±1°C",ph:"碱性预浴",m:"注意：除碳前不需要水洗！\n除碳液停留10-20秒后倒出，用27°C清水洗至无黑水即可。"},
+                {n:"2. 预热水洗",t:30,tp:"42°C",ph:"~7.0",m:"防止显影液加入时罐内温度下降。"},
+                {n:"3. 电影彩显",isDev:true,tp:"41.1±0.1°C",ph:"10.25±0.05",m:"1-6卷基准3分钟。第7-8卷需3分20秒，第9-10卷需3分45秒。"},
+                {n:"4. 停显",t:30,tp:"27-38°C",ph:"0.8-1.5",m:"迅速倒入以中和显影液。"},
+                {n:"5. 水洗",t:30,tp:"27-38°C",ph:"~7.0",m:"洗净停显液残留。"},
+                {n:"6. 漂白",t:195,tp:"27±1°C",ph:"4.75±0.2",m:"1-6卷基准3分15秒。每增加两卷冲洗量，延时20秒。"},
+                {n:"7. 水洗",t:60,tp:"27-38°C",ph:"~7.0",m:"洗去漂白液。"},
+                {n:"8. 定影",t:180,tp:"38±1°C",ph:"7.75-7.93",m:"1-6卷基准3分钟。7-8卷4分钟，9-10卷5分钟。"},
+                {n:"9. 水洗",t:120,tp:"27-38°C",ph:"~7.0",m:"彻底洗净定影液。"},
+                {n:"10. 稳定",t:60,tp:"27-38°C",ph:"-",m:"完成后无需再水洗，直接取出晾干。"}
+            ],
             "C-41 (彩负)": [
-                {n:"预洗",t:60,tp:"38°",ph:"~7.0 (中性水)",m:"软化药膜"},
-                {n:"彩显",isDev:true,tp:"38.0°",ph:"10.0-10.2 (强碱)",m:"核心发色！低于10会导致反差严重下降"},
-                {n:"漂定",t:390,tp:"38°",ph:"6.0-6.5 (弱酸)",m:"清除未感光银盐，保持通风"},
-                {n:"水洗",t:180,tp:"35°",ph:"~7.0 (中性水)",m:"彻底洗净残留酸性物质"}
+                {n:"预洗",t:60,tp:"38°C",ph:"~7.0",m:"软化药膜"}, {n:"彩显",isDev:true,tp:"38.0°C",ph:"10.0-10.2",m:"核心发色"},
+                {n:"漂定",t:390,tp:"38°C",ph:"6.0-6.5",m:"清除未感光银盐"}, {n:"水洗",t:180,tp:"35°C",ph:"~7.0",m:"彻底洗净残留"}
             ],
             "E-6 (标准反转)": [
-                {n:"首显",isDev:true,tp:"38.0°",ph:"9.5-9.7 (弱碱)",m:"决定高光密度，pH极度敏感"},
-                {n:"水洗",t:120,tp:"38°",ph:"~7.0 (中性水)",m:"必须洗净，防止首显液污染彩显液"},
-                {n:"彩显",t:360,tp:"38.0°",ph:"11.8-12.0 (极强碱)",m:"激发正像色彩，注意防护"},
-                {n:"漂定",t:360,tp:"38°",ph:"~5.5 (酸性)",m:"去除银影保留染料"}
-            ],
-            "ECN-2 (电影负片)": [
-                {n:"除碳",t:60,tp:"38°",ph:"9.0-10.0 (碱性预浴)",m:"小苏打或硼砂水，破坏碳层结合力"},
-                {n:"电影彩显",isDev:true,tp:"41.1°",ph:"10.2-10.3 (强碱)",m:"CD-3显影剂特性，对氧化敏感"},
-                {n:"停影",t:30,tp:"38°",ph:"1.0-2.0 (强酸)",m:"瞬间中和强碱彩显液，防止污染漂白液"},
-                {n:"漂定",t:360,tp:"38°",ph:"~6.0 (弱酸)",m:"脱银固影"}
+                {n:"首显",isDev:true,tp:"38.0°C",ph:"9.5-9.7",m:"决定高光密度"}, {n:"水洗",t:120,tp:"38°C",ph:"~7.0",m:"必须洗净防止污染"},
+                {n:"彩显",t:360,tp:"38.0°C",ph:"11.8-12.0",m:"激发正像色彩"}, {n:"漂定",t:360,tp:"38°C",ph:"~5.5",m:"去除银影保留染料"}
             ],
             "D-94A (电影正片)": [
-                {n:"第一显影",isDev:true,tp:"20°",ph:"9.5-10.0 (碱性)",m:"D-94A专用配方，高反差"},
-                {n:"定影",t:300,tp:"20°",ph:"4.0-5.0 (酸性)",m:"坚膜定影"}
+                {n:"第一显影",isDev:true,tp:"20°C",ph:"9.5-10.0",m:"D-94A专用配方，高反差"}, {n:"定影",t:300,tp:"20°C",ph:"4.0-5.0",m:"坚膜定影"}
             ],
             "彩负正冲 (C41 in E6)": [
-                {n:"首显(E6)",isDev:true,tp:"38°",ph:"9.5-9.7 (弱碱)",m:"借用E-6药液建立负像基础"},
-                {n:"彩显(E6)",t:360,tp:"38°",ph:"11.8-12.0 (强碱)",m:"强行彩色反转，偏色严重"},
-                {n:"漂定",t:360,tp:"38°",ph:"~5.5 (酸性)",m:"常规脱银"}
+                {n:"首显(E6)",isDev:true,tp:"38°C",ph:"9.5-9.7",m:"借用E-6药液建立负像基础"}, {n:"彩显(E6)",t:360,tp:"38°C",ph:"11.8-12.0",m:"强行彩色反转"},
+                {n:"漂定",t:360,tp:"38°C",ph:"~5.5",m:"常规脱银"}
             ],
             "黑白正冲 (BW Reversal)": [
-                {n:"首显(强显)",isDev:true,tp:"20°",ph:"9.0-9.5 (碱性)",m:"需加入硫氰酸钾增强高光"},
-                {n:"漂白",t:300,tp:"20°",ph:"1.0-2.0 (极强酸)",m:"高锰酸钾或重铬酸钾，极度危险！"},
-                {n:"清液",t:120,tp:"20°",ph:"5.0-6.0 (弱酸)",m:"亚硫酸钠清除漂白液黄渍"},
-                {n:"二次显影",t:300,tp:"20°",ph:"~9.0 (碱性)",m:"曝光后强迫显影"}
+                {n:"首显(强显)",isDev:true,tp:"20°C",ph:"9.0-9.5",m:"需加入硫氰酸钾增强高光"}, {n:"漂白",t:300,tp:"20°C",ph:"1.0-2.0",m:"高锰酸钾或重铬酸钾，极度危险！"},
+                {n:"清液",t:120,tp:"20°C",ph:"5.0-6.0",m:"亚硫酸钠清除漂白液黄渍"}, {n:"二次显影",t:300,tp:"20°C",ph:"~9.0",m:"曝光后强迫显影"}
             ],
             "B&W (标准黑白)": [
-                {n:"显影",isDev:true,tp:"20°",ph:"8.5-9.0 (弱碱)",m:"常见D-76或HC-110"},
-                {n:"停显",t:30,tp:"20°",ph:"1.5-2.5 (强酸)",m:"冰醋酸/柠檬酸，迅速中止显影"},
-                {n:"定影",t:300,tp:"20°",ph:"4.0-5.0 (酸性)",m:"快速定影液洗去未感光卤化银"}
+                {n:"显影",isDev:true,tp:"20°C",ph:"8.5-9.0",m:"常见D-76或HC-110"}, {n:"停显",t:30,tp:"20°C",ph:"1.5-2.5",m:"冰醋酸/柠檬酸迅速中止显影"},
+                {n:"定影",t:300,tp:"20°C",ph:"4.0-5.0",m:"洗去未感光卤化银"}
             ]
         };
 
@@ -188,11 +184,11 @@
             time = dur; total = dur;
             document.getElementById('s-out').innerText = `${sIdx+1} / ${steps.length}`;
             document.getElementById('step-name').innerText = step.n;
-            document.getElementById('m-temp').innerText = step.tp || "20°";
+            document.getElementById('m-temp').innerText = step.tp || "20°C";
             document.getElementById('m-act').innerText = step.a || "标准搅拌";
             document.getElementById('m-ph').innerText = step.ph || "未知";
             
-            let extraNote = step.isDev && totalComp > 0 ? ` [已应用 ${totalComp}% 时间补偿]` : "";
+            let extraNote = step.isDev && totalComp > 0 ? `\n[显影已自动延时 ${totalComp}%]` : "";
             document.getElementById('m-note').innerText = (step.m || "无特殊要求") + extraNote;
             
             document.getElementById('timer').innerText = fmt(time);
@@ -225,7 +221,7 @@
             const m = document.getElementById('film-sel').value;
             const tc = parseInt(document.getElementById('comp-slide').value) + parseInt(document.getElementById('exp-sel').value);
             if(sIdx < STEPS[p].length - 1) { sIdx++; stop(); loadStep(STEPS[p], DB[p][m], tc); }
-            else { alert("冲洗流程结束，赶紧看看底片吧！"); }
+            else { alert("冲洗流程圆满结束！期待你的大作！"); }
         }
 
         function beep() { try { const ac=new AudioContext(), os=ac.createOscillator(); os.connect(ac.destination); os.start(); os.stop(ac.currentTime+0.5); } catch(e){} }
